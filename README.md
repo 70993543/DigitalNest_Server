@@ -19,4 +19,17 @@ Iniciar servidor
 npm run dev
 ```
 
+---
+
+Comandos adicionales útiles
+
+Sobreescribir commit
+```cmd
+git commit --amend
+```
+
+Subida forzada si ya subiste commit en repositorio remoto
+```cmd
+git push <remote> <branch> --force
+```
 
