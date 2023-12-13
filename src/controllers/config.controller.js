@@ -1,11 +1,11 @@
 const Config = require('../models/config.schema');
 const path = require('path');
-const fs = require('fs').promises; // Importar fs.promises
+const fsPromises = require('fs').promises;
 
 const obtener_config_admin = async (req, res) => {
     try {
         if (req.user && req.user.role === 'admin') {
-            const reg = await Config.findById('657782fedd5f2bebac36c858'); // Utilizar directamente el ID
+            const reg = await Config.findById('657782fedd5f2bebac36c858');
             res.status(200).send({ data: reg });
         } else {
             res.status(403).send({ message: 'Acceso no autorizado' });
@@ -21,9 +21,7 @@ const actualizar_config_admin = async (req, res) => {
         if (req.user && req.user.role === 'admin') {
             const data = req.body;
 
-            // Verificar si existe un archivo en req.files.logo
             if (req.files && req.files.logo) {
-
                 console.log('Si hay imagen');
 
                 const img_path = req.files.logo.path;
@@ -31,29 +29,22 @@ const actualizar_config_admin = async (req, res) => {
                 const logo_name = name[name.length - 1];
 
                 const reg = await Config.findByIdAndUpdate('657782fedd5f2bebac36c858', {
-                    categorias: data.categorias,
+                    categorias: JSON.parse(data.categorias),
                     titulo: data.titulo,
                     serie: data.serie,
                     logo: logo_name,
                     correlativo: data.correlativo
                 });
 
-                // Verificar si existe un logo anterior
                 if (reg.logo) {
-                    
-                    // Eliminar la imagen anterior
                     const imgPathAnterior = path.join(__dirname, '../uploads/configuraciones/', reg.logo);
                     try {
-                        
-                        // Verificar la existencia del archivo antes de intentar eliminarlo
-                        await fs.access(imgPathAnterior, fs.constants.F_OK);
-                        await fs.unlink(imgPathAnterior);
+                        await fsPromises.unlink(imgPathAnterior);
                         console.log('Imagen anterior eliminada:', imgPathAnterior);
                     } catch (error) {
-                        console.error('Error al eliminar la imagen anterior:', error)
+                        console.error('Error al eliminar la imagen anterior:', error);
                     }
                 }
-
 
                 res.status(200).send({ data: reg });
             } else {
@@ -76,8 +67,33 @@ const actualizar_config_admin = async (req, res) => {
     }
 };
 
+const obtener_logo = async (req, res) => {
+    try {
+        const img = req.params['img'];
+        const path_img = path.join(__dirname, '../uploads/configuraciones/', img);
+
+        await fsPromises.access(path_img, fsPromises.constants.F_OK);
+
+        res.status(200).sendFile(path.resolve(path_img));
+    } catch (err) {
+        console.error(err);
+        let path_img_default = path.join(__dirname, '../uploads/default.jpg');
+
+        res.status(404).sendFile(path.resolve(path_img_default));
+    }
+};
+
+const obtener_config_publico = async (req, res) => {
+    let reg = await Config.findById('657782fedd5f2bebac36c858')
+    res.status(200).send({data: reg})
+
+}
+
 module.exports = {
     actualizar_config_admin,
-    obtener_config_admin
+    obtener_config_admin,
+    obtener_logo,
+    obtener_config_publico
 };
+
 
