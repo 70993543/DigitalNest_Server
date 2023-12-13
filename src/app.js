@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const app = express();
 const port = process.env.PORT || 4201;
 const cors = require("cors");
-const dbConfig = require("./config/database");
+const dbConfig = require("./database/database");
 
 // Obtener rutas
 const cliente_route = require("./routes/cliente.route");
